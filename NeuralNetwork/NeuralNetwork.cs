@@ -3,58 +3,111 @@ namespace NeuralNetwork;
 public class NeuralNetwork
 {
     private static Random rand = new Random();
-    // Weights for the connections between the input and hidden layers & hidden and output layers
-    private double[,] weightsInputHidden = new double[4, 3];
-    private double[,] weightsHiddenOutput = new double[3, 1];
+    // Weights between input and hidden layers
+    private double[,] weightsInputHidden;
+    // Weights between hidden and output layers
+    private double[,] weightsHiddenOutput;
 
-    public NeuralNetwork()
+    public NeuralNetwork(int inputNodes, int hiddenNodes)
     {
+        // Initialize weights
+        weightsInputHidden = new double[inputNodes, hiddenNodes];
+        weightsHiddenOutput = new double[hiddenNodes, 1];
+
         // Initialize weights randomly
-        for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 3; j++)
+        for (int i = 0; i < inputNodes; i++)
+        for (int j = 0; j < hiddenNodes; j++)
             weightsInputHidden[i, j] = rand.NextDouble();
-        
-        for (int i = 0; i < 3; i++)
+
+        for (int i = 0; i < hiddenNodes; i++)
             weightsHiddenOutput[i, 0] = rand.NextDouble();
+    }
+    
+    private double Sigmoid(double x)
+    {
+        // Maps any value to a value between 0 and 1
+        return 1 / (1 + Math.Exp(-x));
     }
     
     public double[] FeedForward(double[] inputs)
     {
-        // Calculate the output of the hidden layer
-        double[] hiddenLayerOutputs = new double[3];
-        for (int i = 0; i < 3; i++) // For each neuron in the hidden layer
-        for (int j = 0; j < 4; j++) // For each input
+        // Calculate the outputs of the hidden layer
+        double[] hiddenLayerOutputs = new double[weightsInputHidden.GetLength(1)];
+        for (int i = 0; i < weightsInputHidden.GetLength(1); i++)
+        for (int j = 0; j < weightsInputHidden.GetLength(0); j++)
             hiddenLayerOutputs[i] += inputs[j] * weightsInputHidden[j, i];
 
         // Apply the activation function to the hidden layer outputs
+        // Get the output of Hidden Layer
+        for (int i = 0; i < hiddenLayerOutputs.Length; i++)
+            hiddenLayerOutputs[i] = Sigmoid(hiddenLayerOutputs[i]);
+
+        // Calculate the output of the neural network
         double output = 0;
-        // Calculate the output of the output layer
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < weightsHiddenOutput.GetLength(0); i++)
             output += hiddenLayerOutputs[i] * weightsHiddenOutput[i, 0];
+
         // Apply the activation function to the output
+        output = Sigmoid(output);
+
         return new double[] { output };
     }
 
-    public void Train(double[][] inputs, double[] outputs, int numEpochs)
+    public void Train(double[][] inputs, double[][] outputs, int numIterations)
     {
-        // Train the neural network
-        for (int epoch = 0; epoch < numEpochs; epoch++)
+        // Simple random search algorithm to train the network
+        for (int iteration = 0; iteration < numIterations; iteration++)
         {
-            // For each training example
-            for (int i = 0; i < inputs.Length; i++)
+            // Randomly adjust the weights
+            for (int i = 0; i < weightsInputHidden.GetLength(0); i++)
+            for (int j = 0; j < weightsInputHidden.GetLength(1); j++)
             {
-                // Make a prediction
-                double[] predictedOutputs = FeedForward(inputs[i]);
-                double error = outputs[i] - predictedOutputs[0];
+                // Save the old weight
+                double oldWeight = weightsInputHidden[i, j];
 
-                // Adjust weights
-                for (int j = 0; j < 4; j++)
-                for (int k = 0; k < 3; k++)
-                    weightsInputHidden[j, k] += inputs[i][j] * error * 0.01;
-                
-                for (int j = 0; j < 3; j++)
-                    weightsHiddenOutput[j, 0] += error * 0.01;
+                weightsInputHidden[i, j] += (rand.NextDouble() - 0.5) * 0.01;
+                // If the new weights do not improve the performance, revert to the old weight
+                if (CalculateMeanSquaredError(inputs, outputs) < CalculateMeanSquaredError(inputs, outputs))
+                    weightsInputHidden[i, j] = oldWeight;
+            }
+            
+            for (int i = 0; i < weightsHiddenOutput.GetLength(0); i++)
+            {
+                // Save the old weight
+                double oldWeight = weightsHiddenOutput[i, 0];
+
+                // Randomly adjust the weight
+                weightsHiddenOutput[i, 0] += (rand.NextDouble() - 0.5) * 0.01;
+
+                // If the new weights do not improve the performance, revert to the old weight
+                if (CalculateMeanSquaredError(inputs, outputs) < CalculateMeanSquaredError(inputs, outputs))
+                    weightsHiddenOutput[i, 0] = oldWeight;
             }
         }
+    }
+
+    private double CalculateMeanSquaredError(double[][] inputs, double[][] outputs)
+    {
+        // Calculate the mean squared error
+        double totalError = 0;
+
+        // For each training example
+        for (int i = 0; i < inputs.Length; i++)
+        {
+            // Make a prediction
+            double[] predictedOutputs = FeedForward(inputs[i]);
+
+            // For each output value
+            for (int j = 0; j < outputs[i].Length; j++)
+            {
+                double error = outputs[i][j] - predictedOutputs[j];
+
+                // Add the squared error to the total error
+                totalError += Math.Pow(error, 2);
+            }
+        }
+
+        // Return the mean squared error
+        return totalError / (inputs.Length * outputs[0].Length);
     }
 }
