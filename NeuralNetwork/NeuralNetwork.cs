@@ -2,14 +2,24 @@ namespace NeuralNetwork;
 
 public class NeuralNetwork
 {
+    public enum ActivationFunction
+    {
+        Sigmoid,
+        HyperbolicTangent,
+        ReLU
+    }
+    
     private static Random rand = new Random();
     // Weights between input and hidden layers
     private double[,] weightsInputHidden;
     // Weights between hidden and output layers
     private double[,] weightsHiddenOutput;
+    // Placeholder for the activation function
+    private ActivationFunction activationFunction;
 
-    public NeuralNetwork(int inputNodes, int hiddenNodes)
+    public NeuralNetwork(int inputNodes, int hiddenNodes, ActivationFunction activationFunction)
     {
+        this.activationFunction = activationFunction;
         // Initialize weights
         weightsInputHidden = new double[inputNodes, hiddenNodes];
         weightsHiddenOutput = new double[hiddenNodes, 1];
@@ -29,6 +39,33 @@ public class NeuralNetwork
         return 1 / (1 + Math.Exp(-x));
     }
     
+    private double HyperbolicTangent(double x)
+    {
+        // Maps any value to a value between -1 and 1
+        return Math.Tanh(x);
+    }
+
+    private double ReLU(double x)
+    {
+        // Maps any negative value to 0 and keeps positive values as they are
+        return Math.Max(0, x);
+    }
+    
+    private double ApplyActivationFunction(double x)
+    {
+        switch (activationFunction)
+        {
+            case ActivationFunction.Sigmoid:
+                return Sigmoid(x);
+            case ActivationFunction.HyperbolicTangent:
+                return HyperbolicTangent(x);
+            case ActivationFunction.ReLU:
+                return ReLU(x);
+            default:
+                throw new ArgumentException("Invalid activation function");
+        }
+    }
+    
     public double[] FeedForward(double[] inputs)
     {
         // Calculate the outputs of the hidden layer
@@ -39,8 +76,10 @@ public class NeuralNetwork
 
         // Apply the activation function to the hidden layer outputs
         // Get the output of Hidden Layer
+        
+        // Apply the activation function to the hidden layer outputs
         for (int i = 0; i < hiddenLayerOutputs.Length; i++)
-            hiddenLayerOutputs[i] = Sigmoid(hiddenLayerOutputs[i]);
+            hiddenLayerOutputs[i] = ApplyActivationFunction(hiddenLayerOutputs[i]);
 
         // Calculate the output of the neural network
         double output = 0;
@@ -48,7 +87,7 @@ public class NeuralNetwork
             output += hiddenLayerOutputs[i] * weightsHiddenOutput[i, 0];
 
         // Apply the activation function to the output
-        output = Sigmoid(output);
+        output = ApplyActivationFunction(output);
 
         return new double[] { output };
     }
@@ -109,5 +148,10 @@ public class NeuralNetwork
 
         // Return the mean squared error
         return totalError / (inputs.Length * outputs[0].Length);
+    }
+    
+    public string GetActivationFunction()
+    {
+        return activationFunction.ToString();
     }
 }

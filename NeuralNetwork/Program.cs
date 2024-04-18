@@ -6,6 +6,8 @@ public class Program
 {
     public static void PredictFruits(NeuralNetwork nn, double[][] fruits, double[][] outputs)
     {
+        Console.WriteLine($"The neural network is using the {nn.GetActivationFunction()} activation function.");
+
         for (int i = 0; i < fruits.Length; i++)
         {
             var fruit = fruits[i];
@@ -27,16 +29,16 @@ public class Program
     public static void Main(string[] args)
     {
         // Create a new neural network with 2 input nodes (spike length and spot size) and 10 hidden nodes
-        NeuralNetwork nn = new NeuralNetwork(2, 10);
+        NeuralNetwork nn = new NeuralNetwork(2, 10, NeuralNetwork.ActivationFunction.HyperbolicTangent);
 
         // Define input and output data for 500 fruits
         // spike length, spot size for fruit
-        double[][] inputs = new double[500][];
-        double[][] outputs = new double[500][];
+        double[][] inputs = new double[250][];
+        double[][] outputs = new double[250][];
 
         // Generate random data for 500 fruits
         Random rand = new Random();
-        for (int i = 0; i < 500; i++)
+        for (int i = 0; i < 250; i++)
         {
             inputs[i] = new double[] { Math.Round(rand.NextDouble(), 2), Math.Round(rand.NextDouble(), 2) }; // spike length, spot size
             outputs[i] = new double[] { rand.Next(2) }; // 1 if poisonous, 0 if not
@@ -49,8 +51,6 @@ public class Program
         double[][] fruitsToPredict = new double[][]
         {
             new double[] { 1.10, 0.65 },
-            new double[] { 0.50, 0.30 },
-            new double[] { 0.70, 0.95 }
         };
 
         // Make predictions for the range of fruits
