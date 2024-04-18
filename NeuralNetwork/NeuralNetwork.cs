@@ -6,31 +6,31 @@ public class NeuralNetwork
     {
         Sigmoid,
         HyperbolicTangent,
-        ReLU
+        ReLu
     }
     
-    private static Random rand = new Random();
+    private static Random _rand = new Random();
     // Weights between input and hidden layers
-    private double[,] weightsInputHidden;
+    private double[,] _weightsInputHidden;
     // Weights between hidden and output layers
-    private double[,] weightsHiddenOutput;
+    private double[,] _weightsHiddenOutput;
     // Placeholder for the activation function
-    private ActivationFunction activationFunction;
+    private ActivationFunction _activationFunction;
 
     public NeuralNetwork(int inputNodes, int hiddenNodes, ActivationFunction activationFunction)
     {
-        this.activationFunction = activationFunction;
+        this._activationFunction = activationFunction;
         // Initialize weights
-        weightsInputHidden = new double[inputNodes, hiddenNodes];
-        weightsHiddenOutput = new double[hiddenNodes, 1];
+        _weightsInputHidden = new double[inputNodes, hiddenNodes];
+        _weightsHiddenOutput = new double[hiddenNodes, 1];
 
         // Initialize weights randomly
         for (int i = 0; i < inputNodes; i++)
         for (int j = 0; j < hiddenNodes; j++)
-            weightsInputHidden[i, j] = rand.NextDouble();
+            _weightsInputHidden[i, j] = _rand.NextDouble();
 
         for (int i = 0; i < hiddenNodes; i++)
-            weightsHiddenOutput[i, 0] = rand.NextDouble();
+            _weightsHiddenOutput[i, 0] = _rand.NextDouble();
     }
     
     private double Sigmoid(double x)
@@ -45,7 +45,7 @@ public class NeuralNetwork
         return Math.Tanh(x);
     }
 
-    private double ReLU(double x)
+    private double ReLu(double x)
     {
         // Maps any negative value to 0 and keeps positive values as they are
         return Math.Max(0, x);
@@ -53,14 +53,14 @@ public class NeuralNetwork
     
     private double ApplyActivationFunction(double x)
     {
-        switch (activationFunction)
+        switch (_activationFunction)
         {
             case ActivationFunction.Sigmoid:
                 return Sigmoid(x);
             case ActivationFunction.HyperbolicTangent:
                 return HyperbolicTangent(x);
-            case ActivationFunction.ReLU:
-                return ReLU(x);
+            case ActivationFunction.ReLu:
+                return ReLu(x);
             default:
                 throw new ArgumentException("Invalid activation function");
         }
@@ -69,10 +69,10 @@ public class NeuralNetwork
     public double[] FeedForward(double[] inputs)
     {
         // Calculate the outputs of the hidden layer
-        double[] hiddenLayerOutputs = new double[weightsInputHidden.GetLength(1)];
-        for (int i = 0; i < weightsInputHidden.GetLength(1); i++)
-        for (int j = 0; j < weightsInputHidden.GetLength(0); j++)
-            hiddenLayerOutputs[i] += inputs[j] * weightsInputHidden[j, i];
+        double[] hiddenLayerOutputs = new double[_weightsInputHidden.GetLength(1)];
+        for (int i = 0; i < _weightsInputHidden.GetLength(1); i++)
+        for (int j = 0; j < _weightsInputHidden.GetLength(0); j++)
+            hiddenLayerOutputs[i] += inputs[j] * _weightsInputHidden[j, i];
 
         // Apply the activation function to the hidden layer outputs
         // Get the output of Hidden Layer
@@ -83,8 +83,8 @@ public class NeuralNetwork
 
         // Calculate the output of the neural network
         double output = 0;
-        for (int i = 0; i < weightsHiddenOutput.GetLength(0); i++)
-            output += hiddenLayerOutputs[i] * weightsHiddenOutput[i, 0];
+        for (int i = 0; i < _weightsHiddenOutput.GetLength(0); i++)
+            output += hiddenLayerOutputs[i] * _weightsHiddenOutput[i, 0];
 
         // Apply the activation function to the output
         output = ApplyActivationFunction(output);
@@ -98,29 +98,29 @@ public class NeuralNetwork
         for (int iteration = 0; iteration < numIterations; iteration++)
         {
             // Randomly adjust the weights
-            for (int i = 0; i < weightsInputHidden.GetLength(0); i++)
-            for (int j = 0; j < weightsInputHidden.GetLength(1); j++)
+            for (int i = 0; i < _weightsInputHidden.GetLength(0); i++)
+            for (int j = 0; j < _weightsInputHidden.GetLength(1); j++)
             {
                 // Save the old weight
-                double oldWeight = weightsInputHidden[i, j];
+                double oldWeight = _weightsInputHidden[i, j];
 
-                weightsInputHidden[i, j] += (rand.NextDouble() - 0.5) * 0.01;
+                _weightsInputHidden[i, j] += (_rand.NextDouble() - 0.5) * 0.01;
                 // If the new weights do not improve the performance, revert to the old weight
                 if (CalculateMeanSquaredError(inputs, outputs) < CalculateMeanSquaredError(inputs, outputs))
-                    weightsInputHidden[i, j] = oldWeight;
+                    _weightsInputHidden[i, j] = oldWeight;
             }
             
-            for (int i = 0; i < weightsHiddenOutput.GetLength(0); i++)
+            for (int i = 0; i < _weightsHiddenOutput.GetLength(0); i++)
             {
                 // Save the old weight
-                double oldWeight = weightsHiddenOutput[i, 0];
+                double oldWeight = _weightsHiddenOutput[i, 0];
 
                 // Randomly adjust the weight
-                weightsHiddenOutput[i, 0] += (rand.NextDouble() - 0.5) * 0.01;
+                _weightsHiddenOutput[i, 0] += (_rand.NextDouble() - 0.5) * 0.01;
 
                 // If the new weights do not improve the performance, revert to the old weight
                 if (CalculateMeanSquaredError(inputs, outputs) < CalculateMeanSquaredError(inputs, outputs))
-                    weightsHiddenOutput[i, 0] = oldWeight;
+                    _weightsHiddenOutput[i, 0] = oldWeight;
             }
         }
     }
@@ -152,6 +152,6 @@ public class NeuralNetwork
     
     public string GetActivationFunction()
     {
-        return activationFunction.ToString();
+        return _activationFunction.ToString();
     }
 }
