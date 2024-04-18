@@ -92,7 +92,7 @@ public class NeuralNetwork
         return new double[] { output };
     }
 
-    public void Train(double[][] inputs, double[][] outputs, int numIterations)
+    public void Train(double[][] inputs, double[][] outputs, int numIterations, double lambda)
     {
         // Simple random search algorithm to train the network
         for (int iteration = 0; iteration < numIterations; iteration++)
@@ -104,19 +104,21 @@ public class NeuralNetwork
                 // Save the old weight
                 double oldWeight = _weightsInputHidden[i, j];
 
-                _weightsInputHidden[i, j] += (_rand.NextDouble() - 0.5) * 0.01;
+                // Randomly adjust the weight and apply regularization
+                _weightsInputHidden[i, j] += (_rand.NextDouble() - 0.5) * 0.01 - lambda * _weightsInputHidden[i, j];
+            
                 // If the new weights do not improve the performance, revert to the old weight
                 if (CalculateMeanSquaredError(inputs, outputs) < CalculateMeanSquaredError(inputs, outputs))
                     _weightsInputHidden[i, j] = oldWeight;
             }
-            
+        
             for (int i = 0; i < _weightsHiddenOutput.GetLength(0); i++)
             {
                 // Save the old weight
                 double oldWeight = _weightsHiddenOutput[i, 0];
 
-                // Randomly adjust the weight
-                _weightsHiddenOutput[i, 0] += (_rand.NextDouble() - 0.5) * 0.01;
+                // Randomly adjust the weight and apply regularization
+                _weightsHiddenOutput[i, 0] += (_rand.NextDouble() - 0.5) * 0.01 - lambda * _weightsHiddenOutput[i, 0];
 
                 // If the new weights do not improve the performance, revert to the old weight
                 if (CalculateMeanSquaredError(inputs, outputs) < CalculateMeanSquaredError(inputs, outputs))
