@@ -26,8 +26,8 @@ public class NeuralNetwork
 
         // Initialize weights randomly
         for (int i = 0; i < inputNodes; i++)
-        for (int j = 0; j < hiddenNodes; j++)
-            _weightsInputHidden[i, j] = _rand.NextDouble();
+            for (int j = 0; j < hiddenNodes; j++)
+                _weightsInputHidden[i, j] = _rand.NextDouble();
 
         for (int i = 0; i < hiddenNodes; i++)
             _weightsHiddenOutput[i, 0] = _rand.NextDouble();
@@ -71,8 +71,8 @@ public class NeuralNetwork
         // Calculate the outputs of the hidden layer
         double[] hiddenLayerOutputs = new double[_weightsInputHidden.GetLength(1)];
         for (int i = 0; i < _weightsInputHidden.GetLength(1); i++)
-        for (int j = 0; j < _weightsInputHidden.GetLength(0); j++)
-            hiddenLayerOutputs[i] += inputs[j] * _weightsInputHidden[j, i];
+            for (int j = 0; j < _weightsInputHidden.GetLength(0); j++)
+                hiddenLayerOutputs[i] += inputs[j] * _weightsInputHidden[j, i];
 
         // Apply the activation function to the hidden layer outputs
         // Get the output of Hidden Layer
@@ -104,24 +104,36 @@ public class NeuralNetwork
                 // Save the old weight
                 double oldWeight = _weightsInputHidden[i, j];
 
+                // Calculate the old error
+                double oldError = CalculateMeanSquaredError(inputs, outputs);
+
                 // Randomly adjust the weight and apply regularization
                 _weightsInputHidden[i, j] += (_rand.NextDouble() - 0.5) * 0.01 - lambda * _weightsInputHidden[i, j];
-            
+
+                // Calculate the new error
+                double newError = CalculateMeanSquaredError(inputs, outputs);
+
                 // If the new weights do not improve the performance, revert to the old weight
-                if (CalculateMeanSquaredError(inputs, outputs) < CalculateMeanSquaredError(inputs, outputs))
+                if (newError > oldError)
                     _weightsInputHidden[i, j] = oldWeight;
             }
-        
+
             for (int i = 0; i < _weightsHiddenOutput.GetLength(0); i++)
             {
                 // Save the old weight
                 double oldWeight = _weightsHiddenOutput[i, 0];
 
+                // Calculate the old error
+                double oldError = CalculateMeanSquaredError(inputs, outputs);
+
                 // Randomly adjust the weight and apply regularization
                 _weightsHiddenOutput[i, 0] += (_rand.NextDouble() - 0.5) * 0.01 - lambda * _weightsHiddenOutput[i, 0];
 
+                // Calculate the new error
+                double newError = CalculateMeanSquaredError(inputs, outputs);
+
                 // If the new weights do not improve the performance, revert to the old weight
-                if (CalculateMeanSquaredError(inputs, outputs) < CalculateMeanSquaredError(inputs, outputs))
+                if (newError > oldError)
                     _weightsHiddenOutput[i, 0] = oldWeight;
             }
         }
