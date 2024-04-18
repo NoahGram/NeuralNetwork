@@ -97,6 +97,8 @@ public class NeuralNetwork
         // Simple random search algorithm to train the network
         for (int iteration = 0; iteration < numIterations; iteration++)
         {
+            // Logger per 100 iterations
+            Console.WriteLine($"Iteration {iteration + 1}/{numIterations}");
             // Randomly adjust the weights
             for (int i = 0; i < _weightsInputHidden.GetLength(0); i++)
             for (int j = 0; j < _weightsInputHidden.GetLength(1); j++)
