@@ -8,7 +8,7 @@ Training: Includes a simple training method using random search and regularizati
 Data Generation: Generates random data for a fruit classification problem (poisonous vs non-poisonous).
 
 # Getting Started
-## Prerequisites
+### Prerequisites
 .NET SDK
 
 ## Installation
