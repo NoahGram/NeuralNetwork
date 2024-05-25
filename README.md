@@ -1,5 +1,4 @@
 # NeuralNetwork Library
-## Overview
 The NeuralNetwork library is a simple implementation of a neural network in C#. This library includes a neural network class with various activation functions and training methods, as well as a utility class for generating random data to simulate a fruit classification problem.
 
 # Features
